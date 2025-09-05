@@ -535,69 +535,15 @@ def export_tickets():
         flash(f'Error exporting tickets: {str(e)}', 'error')
         return redirect(url_for('view_tickets'))
 
+# Cloud deployment configuration
 if __name__ == '__main__':
-    initialize_csv()
-    initialize_database()
-
-# Authentication Routes
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Admin login page"""
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        if (username in USER_CREDENTIALS and 
-            password == USER_CREDENTIALS[username]['password']):
-            session['logged_in'] = True
-            session['username'] = username
-            session['role'] = USER_CREDENTIALS[username]['role']
-            flash(f'Successfully logged in as {username}!', 'success')
-            
-            # Redirect to the page they were trying to access
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('reports'))
-        else:
-            flash('Invalid username or password.', 'error')
+    # Get port from environment (for cloud platforms)
+    port = int(os.environ.get('PORT', 5002))
     
-    return render_template('login.html')
-
-@app.route('/delete_ticket/<ticket_id>', methods=['POST'])
-@superadmin_required
-def delete_ticket(ticket_id):
-    """Delete a ticket (superadmin only)"""
-    try:
-        # Read current tickets
-        tickets = []
-        with open(CSV_FILE, 'r', newline='', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            tickets = [row for row in reader if row['Ticket ID'] != ticket_id]
-        
-        # Write back without the deleted ticket
-        with open(CSV_FILE, 'w', newline='', encoding='utf-8') as file:
-            if tickets:
-                writer = csv.DictWriter(file, fieldnames=CSV_HEADERS)
-                writer.writeheader()
-                writer.writerows(tickets)
-            else:
-                # If no tickets left, just write headers
-                writer = csv.writer(file)
-                writer.writerow(CSV_HEADERS)
-        
-        flash(f'Ticket {ticket_id} has been permanently deleted.', 'success')
-    except Exception as e:
-        flash(f'Error deleting ticket: {str(e)}', 'error')
-    
-    return redirect(url_for('view_tickets'))
-
-@app.route('/logout')
-def logout():
-    """Admin logout"""
-    session.clear()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('index'))
-
-if __name__ == '__main__':
-    initialize_csv()
-    initialize_database()
-    app.run(debug=True, host='0.0.0.0', port=5002)
+    # Production vs development settings
+    if os.environ.get('FLASK_ENV') == 'production':
+        # Production settings
+        app.run(host='0.0.0.0', port=port, debug=False)
+    else:
+        # Development settings
+        app.run(host='0.0.0.0', port=port, debug=True)

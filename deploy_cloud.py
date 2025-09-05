@@ -411,7 +411,7 @@ def main():
         print("1. Push your code to GitHub:")
         print("   git add .")
         print("   git commit -m 'Prepare for cloud deployment'")
-        print("   git remote add origin https://github.com/yourusername/apartment-ticketing.git")
+        print("   git remote add origin https://github.com/metalsrini/apartment-ticketing.git")
         print("   git push -u origin main")
         print("\n2. Deploy to Railway (Recommended):")
         print("   - Go to https://railway.app")
