@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Tickets{% endblock %}
+
+{% block content %}
+<style>
+    .table-responsive {
+        border-radius: 0.5rem;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    .status-open { color: #dc3545; }
+    .status-in-progress { color: #fd7e14; }
+    .status-resolved { color: #198754; }
+    .status-closed { color: #6c757d; }
+    .filter-section {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4">
+                    <i class="fas fa-list me-2"></i>All Tickets
+                    <span class="badge bg-secondary ms-2" id="ticketCount">{{ tickets|length }}</span>
+                </h2>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="blockFilter" class="form-label">Filter by Block:</label>
+                            <select class="form-select" id="blockFilter">
+                                <option value="">All Blocks</option>
+                                {% for block in blocks %}
+                                <option value="{{ block }}">{{ block }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Filter by Status:</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="searchInput" class="form-label">Search:</label>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search tickets...">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                <i class="fas fa-times me-1"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else ('warning' if category == 'warning' else 'success') }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Tickets Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover" id="ticketsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Flat</th>
+                                <th>Block</th>
+                                <th>Problem Type</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                                <th>Action Taken</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in tickets %}
+                            <tr data-full-description="{{ ticket['Description'] }}">
+                                <td><strong>{{ ticket['Ticket ID'] }}</strong></td>
+                                <td>{{ ticket['Flat No'] }}</td>
+                                <td>{{ ticket['Block No'] }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ ticket['Problem Type'] }}</span>
+                                </td>
+                                <td title="{{ ticket['Description'] }}">
+                                    {{ ticket['Description'][:50] }}{% if ticket['Description']|length > 50 %}...{% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if ticket['Status'] == 'Open' %}bg-danger
+                                        {% elif ticket['Status'] == 'In Progress' %}bg-warning
+                                        {% elif ticket['Status'] == 'Resolved' %}bg-success
+                                        {% elif ticket['Status'] == 'Closed' %}bg-secondary
+                                        {% else %}bg-primary{% endif %}">
+                                        {{ ticket['Status'] }}
+                                    </span>
+                                </td>
+                                <td>{{ ticket['Assigned To'] if ticket['Assigned To'] else 'Unassigned' }}</td>
+                                <td data-full-action="{{ ticket['Action Taken'] }}">
+                                    {{ ticket['Action Taken'][:30] }}{% if ticket['Action Taken']|length > 30 %}...{% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="updateTicket('{{ ticket.get('Ticket ID') }}')"
+                                                title="Update">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-info" onclick="viewDetails('{{ ticket.get('Ticket ID') }}')"
+                                                title="Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if session.role == 'superadmin' %}
+                                        <button class="btn btn-outline-danger" onclick="deleteTicket('{{ ticket.get('Ticket ID') }}')"
+                                                title="Delete (Superadmin Only)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if not tickets %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No tickets found</h4>
+                    <p class="text-muted">Create your first ticket to get started.</p>
+                    <a href="/create_ticket" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Ticket
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Modal -->
+    <div class="modal fade" id="updateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Update Ticket
+                        <span id="displayTicketId" class="badge bg-primary ms-2"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="updateForm" method="POST" action="/update_ticket">
+                    <div class="modal-body">
+                        <input type="hidden" id="updateTicketId" name="ticket_id">
+                        
+                        <!-- Ticket Info Display -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Flat:</strong> <span id="displayFlat"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Block:</strong> <span id="displayBlock"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <strong>Problem Type:</strong> <span id="displayProblemType"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <strong>Description:</strong> <span id="displayDescription"></span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Update Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="updateStatus" class="form-label">Status</label>
+                                <select class="form-select" id="updateStatus" name="status">
+                                    <option value="Open">Open</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Resolved">Resolved</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="updateDueDate" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="updateDueDate" name="due_date">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="updateActionTaken" class="form-label">Action Taken</label>
+                            <textarea class="form-control" id="updateActionTaken" name="action_taken" rows="3"
+                                      placeholder="Describe the action taken..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="updateAssignedTo" class="form-label">Assigned To</label>
+                            <input type="text" class="form-control" id="updateAssignedTo" name="assigned_to"
+                                   placeholder="Enter assignee name">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="updateNotes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="updateNotes" name="notes" rows="3"
+                                      placeholder="Add any additional notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function filterTickets() {
+            const blockFilter = document.getElementById('blockFilter').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#ticketsTable tbody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const block = row.cells[2].textContent.toLowerCase();
+                const status = row.cells[5].textContent.toLowerCase();
+                const searchText = row.textContent.toLowerCase();
+
+                const blockMatch = !blockFilter || block.includes(blockFilter);
+                const statusMatch = !statusFilter || status.includes(statusFilter);
+                const searchMatch = !searchInput || searchText.includes(searchInput);
+
+                if (blockMatch && statusMatch && searchMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('ticketCount').textContent = visibleCount;
+        }
+
+        function clearFilters() {
+            document.getElementById('blockFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            filterTickets();
+        }
+
+        function updateTicket(ticketId) {
+            // Find the ticket row and populate modal with current data
+            const rows = document.querySelectorAll('#ticketsTable tbody tr');
+            let ticketData = null;
+            
+            rows.forEach(row => {
+                 if (row.cells[0].textContent === ticketId) {
+                     ticketData = {
+                         id: row.cells[0].textContent,
+                         flat: row.cells[1].textContent,
+                         block: row.cells[2].textContent,
+                         problemType: row.cells[3].textContent,
+                         description: row.getAttribute('data-full-description') || row.cells[4].textContent,
+                         status: row.cells[5].textContent.replace(/\s+/g, ' ').trim(),
+                         assignedTo: row.cells[6].textContent.replace(/\s+/g, ' ').trim(),
+                         actionTaken: row.getAttribute('data-full-action') || row.cells[7].textContent
+                     };
+                 }
+             });
+            
+            if (ticketData) {
+                // Populate modal fields
+                document.getElementById('updateTicketId').value = ticketData.id;
+                document.getElementById('displayTicketId').textContent = ticketData.id;
+                document.getElementById('displayFlat').textContent = ticketData.flat;
+                document.getElementById('displayBlock').textContent = ticketData.block;
+                document.getElementById('displayProblemType').textContent = ticketData.problemType;
+                document.getElementById('displayDescription').textContent = ticketData.description;
+                
+                // Set current status
+                const statusSelect = document.getElementById('updateStatus');
+                const cleanStatus = ticketData.status.replace(/[^a-zA-Z\s]/g, '').trim();
+                statusSelect.value = cleanStatus;
+                
+                // Set current action taken
+                 document.getElementById('updateActionTaken').value = ticketData.actionTaken === '...' ? '' : ticketData.actionTaken;
+                 
+                 // Set current assigned to
+                 const assignedToSelect = document.getElementById('updateAssignedTo');
+                 const cleanAssignedTo = ticketData.assignedTo.replace(/[^a-zA-Z\s()]/g, '').trim();
+                 assignedToSelect.value = cleanAssignedTo === 'Unassigned' ? 'Unassigned' : cleanAssignedTo;
+                 
+                 // Clear other fields
+                 document.getElementById('updateDueDate').value = '';
+                 document.getElementById('updateNotes').value = '';
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('updateModal'));
+            modal.show();
+        }
+
+        function viewDetails(ticketId) {
+            // Find the ticket row and show details
+            const rows = document.querySelectorAll('#ticketsTable tbody tr');
+            rows.forEach(row => {
+                if (row.cells[0].textContent === ticketId) {
+                    const details = {
+                        id: row.cells[0].textContent,
+                        flat: row.cells[1].textContent,
+                        block: row.cells[2].textContent,
+                        problem: row.cells[3].textContent,
+                        description: row.cells[4].textContent,
+                        status: row.cells[5].textContent,
+                        assignedTo: row.cells[6].textContent,
+                        actionTaken: row.cells[7].textContent
+                    };
+                    
+                    alert('Ticket Details:\n\nID: ' + details.id + '\nFlat: ' + details.flat + '\nBlock: ' + details.block + '\nProblem: ' + details.problem + '\nDescription: ' + details.description + '\nStatus: ' + details.status + '\nAssigned To: ' + details.assignedTo + '\nAction Taken: ' + details.actionTaken);
+                }
+            });
+        }
+
+        // Delete ticket function
+        function deleteTicket(ticketId) {
+            if (confirm(`Are you sure you want to permanently delete ticket ${ticketId}? This action cannot be undone.`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/delete_ticket/${ticketId}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('blockFilter').addEventListener('change', filterTickets);
+        document.getElementById('statusFilter').addEventListener('change', filterTickets);
+        document.getElementById('searchInput').addEventListener('input', filterTickets);
+
+        // Update form submission
+        document.getElementById('updateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('/update_ticket', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating ticket: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating ticket');
+            });
+        });
+    </script>
+{% endblock %}

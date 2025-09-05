@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}View Tickets - Apartment Ticketing System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-list"></i> All Tickets
+                </h4>
+                <div>
+                    <a href="{{ url_for('export_tickets') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-download"></i> Export Excel
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> New Ticket
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if tickets %}
+                    <!-- Filter Controls -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <select class="form-select" id="blockFilter">
+                                <option value="">All Blocks</option>
+                                <option value="A">Block A</option>
+                                <option value="B">Block B</option>
+                                <option value="C">Block C</option>
+                                <option value="D">Block D</option>
+                                <option value="P">Block P</option>
+                                <option value="Q">Block Q</option>
+                                <option value="R">Block R</option>
+                                <option value="S">Block S</option>
+                                <option value="T">Block T</option>
+                                <option value="U">Block U</option>
+                                <option value="General Area">General Area</option>
+                                <option value="Basement Parking">Basement Parking</option>
+                                <option value="Podium">Podium</option>
+                                <option value="Club House">Club House</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="problemFilter">
+                                <option value="">All Problem Types</option>
+                                <option value="Plumbing">Plumbing</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Light">Light</option>
+                                <option value="Flooring">Flooring</option>
+                                <option value="AC/Heating">AC/Heating</option>
+                                <option value="Water Supply">Water Supply</option>
+                                <option value="Drainage">Drainage</option>
+                                <option value="Painting">Painting</option>
+                                <option value="Door/Window">Door/Window</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search tickets...">
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ tickets|length }}</h5>
+                                    <p class="card-text">Total Tickets</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title" id="openCount">0</h5>
+                                    <p class="card-text">Open Tickets</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title" id="progressCount">0</h5>
+                                    <p class="card-text">In Progress</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title" id="resolvedCount">0</h5>
+                                    <p class="card-text">Resolved</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tickets Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="ticketsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Flat No</th>
+                                    <th>Block</th>
+                                    <th>Problem Type</th>
+                                    <th>Date Raised</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in tickets %}
+                                <tr class="ticket-row" 
+                                    data-block="{{ ticket['Block No'] }}" 
+                                    data-problem="{{ ticket['Problem Type'] }}" 
+                                    data-status="{{ ticket['Status'] }}">
+                                    <td><strong>{{ ticket['Ticket ID'] }}</strong></td>
+                                    <td>{{ ticket['Flat No'] }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ ticket['Block No'] }}</span>
+                                    </td>
+                                    <td>{{ ticket['Problem Type'] }}</td>
+                                    <td>{{ ticket['Date Raised'] }}</td>
+                                    <td>{{ ticket['Contact Number'] }}</td>
+                                    <td>
+                                        {% if ticket['Status'] == 'Open' %}
+                                            <span class="badge bg-warning">{{ ticket['Status'] }}</span>
+                                        {% elif ticket['Status'] == 'In Progress' %}
+                                            <span class="badge bg-primary">{{ ticket['Status'] }}</span>
+                                        {% elif ticket['Status'] == 'Resolved' %}
+                                            <span class="badge bg-success">{{ ticket['Status'] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ ticket['Status'] }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ ticket['Created At'] }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No tickets found</h5>
+                        <p class="text-muted">No tickets have been submitted yet.</p>
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Submit First Ticket
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Filter functionality
+    function filterTickets() {
+        const blockFilter = document.getElementById('blockFilter').value;
+        const problemFilter = document.getElementById('problemFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        
+        const rows = document.querySelectorAll('.ticket-row');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const block = row.dataset.block;
+            const problem = row.dataset.problem;
+            const status = row.dataset.status;
+            const text = row.textContent.toLowerCase();
+            
+            const blockMatch = !blockFilter || block === blockFilter;
+            const problemMatch = !problemFilter || problem === problemFilter;
+            const statusMatch = !statusFilter || status === statusFilter;
+            const searchMatch = !searchInput || text.includes(searchInput);
+            
+            if (blockMatch && problemMatch && statusMatch && searchMatch) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update statistics
+        updateStatistics();
+    }
+    
+    function updateStatistics() {
+        const visibleRows = document.querySelectorAll('.ticket-row:not([style*="display: none"])');
+        let openCount = 0, progressCount = 0, resolvedCount = 0;
+        
+        visibleRows.forEach(row => {
+            const status = row.dataset.status;
+            if (status === 'Open') openCount++;
+            else if (status === 'In Progress') progressCount++;
+            else if (status === 'Resolved') resolvedCount++;
+        });
+        
+        document.getElementById('openCount').textContent = openCount;
+        document.getElementById('progressCount').textContent = progressCount;
+        document.getElementById('resolvedCount').textContent = resolvedCount;
+    }
+    
+    // Event listeners
+    document.getElementById('blockFilter').addEventListener('change', filterTickets);
+    document.getElementById('problemFilter').addEventListener('change', filterTickets);
+    document.getElementById('statusFilter').addEventListener('change', filterTickets);
+    document.getElementById('searchInput').addEventListener('input', filterTickets);
+    
+    // Initialize statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStatistics();
+    });
+</script>
+{% endblock %}

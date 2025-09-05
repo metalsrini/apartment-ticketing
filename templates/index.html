@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Submit New Ticket - Apartment Ticketing System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-ticket-alt"></i> Submit New Issue Ticket
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('submit_ticket') }}" id="ticketForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="flat_no" class="form-label">
+                                <i class="fas fa-door-open"></i> Flat Number *
+                            </label>
+                            <input type="text" class="form-control" id="flat_no" name="flat_no" 
+                                   placeholder="e.g., 101, A-205" required>
+                            <div class="form-text">Enter your flat number</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="block_no" class="form-label">
+                                <i class="fas fa-building"></i> Block *
+                            </label>
+                            <select class="form-select" id="block_no" name="block_no" required>
+                                <option value="">Select Block</option>
+                                {% for block in block_options %}
+                                    <option value="{{ block }}">{{ block }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="problem_type" class="form-label">
+                                <i class="fas fa-tools"></i> Problem Type *
+                            </label>
+                            <select class="form-select" id="problem_type" name="problem_type" required>
+                                <option value="">Select Problem Type</option>
+                                {% for problem in problem_types %}
+                                    <option value="{{ problem }}">{{ problem }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="date_raised" class="form-label">
+                                <i class="fas fa-calendar"></i> Date of Issue *
+                            </label>
+                            <input type="date" class="form-control" id="date_raised" name="date_raised" 
+                                   value="{{ today }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contact_number" class="form-label">
+                            <i class="fas fa-phone"></i> Contact Number *
+                        </label>
+                        <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                               placeholder="Enter 10-digit mobile number" pattern="[0-9]{10,15}" required>
+                        <div class="form-text">Enter your contact number for communication</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-comment"></i> Issue Description (Optional)
+                        </label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Describe the issue in detail..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane"></i> Submit Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Info Card -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-info-circle text-info"></i> Quick Information
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-clock text-muted"></i> Tickets are processed within 24-48 hours</li>
+                    <li><i class="fas fa-phone text-muted"></i> You'll be contacted on the provided number</li>
+                    <li><i class="fas fa-eye text-muted"></i> <a href="{{ url_for('view_tickets') }}">View all tickets</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Form validation
+    document.getElementById('ticketForm').addEventListener('submit', function(e) {
+        const contactNumber = document.getElementById('contact_number').value;
+        const flatNo = document.getElementById('flat_no').value;
+        
+        // Validate contact number
+        if (contactNumber.length < 10) {
+            e.preventDefault();
+            alert('Contact number must be at least 10 digits long');
+            return false;
+        }
+        
+        // Validate flat number
+        if (!flatNo.trim()) {
+            e.preventDefault();
+            alert('Flat number is required');
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Auto-format contact number (remove non-digits)
+    document.getElementById('contact_number').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+</script>
+{% endblock %}

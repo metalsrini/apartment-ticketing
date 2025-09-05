@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block title %}Casagrand First City Moved In - Issues Register{% endblock %}
+
+{% block content %}
+<style>
+    /* Advanced Typography & Layout */
+    
+    .form-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        overflow: hidden;
+        background: white;
+        margin-bottom: 1rem;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        padding: 1rem 1.5rem;
+        border: none;
+    }
+    
+    .form-header h4 {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 0;
+        color: white;
+    }
+    
+    .form-body {
+        padding: 1.5rem;
+    }
+    
+    .form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-title i {
+        color: #4facfe;
+        font-size: 1rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #34495e;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background-color: #fafbfc;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.15);
+        background-color: white;
+    }
+    
+    .form-control.is-valid {
+        border-color: #28a745;
+        background-color: #f8fff9;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background-color: #fff8f8;
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+    
+    .input-with-icon {
+        padding-left: 2.5rem;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.8rem;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    
+    .btn-outline-custom {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    
+    .btn-outline-custom:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    .invalid-feedback {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    
+    .progress-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 0 0.5rem;
+    }
+    
+    .progress-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+    }
+    
+    .progress-step::before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        right: -50%;
+        height: 2px;
+        background: #e9ecef;
+        z-index: 1;
+    }
+    
+    .progress-step:last-child::before {
+        display: none;
+    }
+    
+    .progress-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #4facfe;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .progress-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 1.8rem;
+        }
+        
+        .form-body {
+            padding: 1.5rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="form-card">
+                <div class="form-header">
+                    <h4><i class="fas fa-edit"></i> Submit New Issue Ticket</h4>
+                </div>
+                
+                <div class="form-body">
+                    <div class="progress-indicator">
+                        <div class="progress-step">
+                            <div class="progress-circle">1</div>
+                            <div class="progress-label">Location</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="progress-circle">2</div>
+                            <div class="progress-label">Issue Details</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="progress-circle">3</div>
+                            <div class="progress-label">Contact Info</div>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('submit_ticket') }}" id="ticketForm">
+                        <!-- Location Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Location Details
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="flat_no" class="form-label">Flat Number *</label>
+                                        <div class="input-group">
+                                            <i class="fas fa-home input-icon"></i>
+                                            <input type="text" class="form-control input-with-icon" id="flat_no" name="flat_no" 
+                                                   placeholder="e.g., 101, A-205" required>
+                                        </div>
+                                        <div class="invalid-feedback">Please enter a valid flat number.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="block_no" class="form-label">Block *</label>
+                                        <div class="input-group">
+                                            <i class="fas fa-building input-icon"></i>
+                                            <select class="form-select input-with-icon" id="block_no" name="block_no" required>
+                                                <option value="">Select Block</option>
+                                                {% for block in block_options %}
+                                                <option value="{{ block }}">{{ block }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback">Please select a block.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Issue Details Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Issue Information
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="problem_type" class="form-label">Problem Type *</label>
+                                        <div class="input-group">
+                                            <i class="fas fa-tools input-icon"></i>
+                                            <select class="form-select input-with-icon" id="problem_type" name="problem_type" required>
+                                                <option value="">Select Problem Type</option>
+                                                {% for problem in problem_types %}
+                                                <option value="{{ problem }}">{{ problem }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback">Please select a problem type.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="date_raised" class="form-label">Date of Issue *</label>
+                                        <div class="input-group">
+                                            <i class="fas fa-calendar input-icon"></i>
+                                            <input type="date" class="form-control input-with-icon" id="date_raised" name="date_raised" 
+                                                   value="{{ today }}" required>
+                                        </div>
+                                        <div class="invalid-feedback">Please select a valid date.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Issue Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" 
+                                          placeholder="Please provide a detailed description of the issue. Include any relevant details that might help our maintenance team resolve it quickly..."></textarea>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Detailed descriptions help our maintenance team resolve issues faster and more effectively.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-phone"></i>
+                                Contact Information
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="contact_number" class="form-label">Contact Number *</label>
+                                <div class="input-group">
+                                    <i class="fas fa-mobile-alt input-icon"></i>
+                                    <input type="tel" class="form-control input-with-icon" id="contact_number" name="contact_number" 
+                                           placeholder="Enter 10-digit mobile number" required>
+                                </div>
+                                <div class="invalid-feedback">Please enter a valid 10-digit contact number.</div>
+                                <div class="form-text">
+                                    <i class="fas fa-shield-alt"></i> 
+                                    Your contact information is kept confidential and used only for issue resolution.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-submit">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Submit Issue Ticket
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{{ url_for('view_tickets') }}" class="btn btn-outline-custom">
+                    <i class="fas fa-list me-2"></i> View All Tickets
+                </a>
+                <a href="{{ url_for('reports') }}" class="btn btn-outline-custom">
+                    <i class="fas fa-chart-bar me-2"></i> View Reports
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced form validation with better UX
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('ticketForm');
+    const contactInput = document.getElementById('contact_number');
+    const flatInput = document.getElementById('flat_no');
+    const descriptionTextarea = document.getElementById('description');
+    
+    // Progress indicator animation
+    const progressSteps = document.querySelectorAll('.progress-circle');
+    
+    function updateProgress(step) {
+        progressSteps.forEach((circle, index) => {
+            if (index <= step) {
+                circle.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+            } else {
+                circle.style.background = '#e9ecef';
+                circle.style.color = '#6c757d';
+            }
+        });
+    }
+    
+    // Form section focus tracking
+    const formSections = document.querySelectorAll('.form-section');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach((input, index) => {
+        input.addEventListener('focus', function() {
+            if (index < 2) updateProgress(0);
+            else if (index < 5) updateProgress(1);
+            else updateProgress(2);
+        });
+    });
+    
+    // Enhanced contact number validation
+    contactInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.substring(0, 10);
+        }
+        e.target.value = value;
+        
+        // Real-time validation feedback
+        if (value.length === 10) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+            if (value.length > 0) {
+                e.target.classList.add('is-invalid');
+            } else {
+                e.target.classList.remove('is-invalid');
+            }
+        }
+    });
+    
+    // Flat number validation
+    flatInput.addEventListener('input', function(e) {
+        const value = e.target.value.trim();
+        if (value.length >= 1) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+        }
+    });
+    
+    // Auto-resize description textarea with smooth animation
+    descriptionTextarea.addEventListener('input', function(e) {
+        e.target.style.height = 'auto';
+        e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+    });
+    
+    // Form submission with enhanced validation
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate contact number
+        const contactNumber = contactInput.value.replace(/\D/g, '');
+        if (contactNumber.length !== 10) {
+            contactInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            contactInput.classList.remove('is-invalid');
+            contactInput.classList.add('is-valid');
+        }
+        
+        // Validate flat number
+        const flatNo = flatInput.value.trim();
+        if (flatNo.length < 1) {
+            flatInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            flatInput.classList.remove('is-invalid');
+            flatInput.classList.add('is-valid');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Smooth scroll to first invalid field
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+        } else {
+            // Show loading state
+            const submitBtn = form.querySelector('.btn-submit');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Add smooth animations for form interactions
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+            this.parentElement.style.transition = 'transform 0.2s ease';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

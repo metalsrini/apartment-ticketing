@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-0"><i class="fas fa-chart-bar"></i> Reports & Analytics</h3>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ url_for('export_tickets') }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-download"></i> Export Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Summary Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ reports.total_tickets }}</h3>
+                                    <p class="mb-0">Total Tickets</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ reports.open_tickets }}</h3>
+                                    <p class="mb-0">Open Tickets</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ reports.in_progress_tickets }}</h3>
+                                    <p class="mb-0">In Progress</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ reports.resolved_tickets }}</h3>
+                                    <p class="mb-0">Resolved</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Tickets by Status</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="statusChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Priority chart removed - all tickets equal -->
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Tickets by Block</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="blockChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Tickets by Problem Type</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="problemChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Tables -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Block-wise Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Block</th>
+                                                    <th>Total</th>
+                                                    <th>Open</th>
+                                                    <th>In Progress</th>
+                                                    <th>Resolved</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for block, data in reports.block_summary.items() %}
+                                                <tr>
+                                                    <td><strong>{{ block }}</strong></td>
+                                                    <td>{{ data.total }}</td>
+                                                    <td><span class="badge bg-warning">{{ data.open }}</span></td>
+                                                    <td><span class="badge bg-info">{{ data.in_progress }}</span></td>
+                                                    <td><span class="badge bg-success">{{ data.resolved }}</span></td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Priority summary removed - all tickets equal -->
+                        </div>
+                    </div>
+
+                    <!-- Staff Performance section removed - no staff assignments -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Chart data from backend
+const chartData = {
+    status: {{ reports.status_chart_data | tojson | safe }},
+    block: {{ reports.block_chart_data | tojson | safe }},
+    problem: {{ reports.problem_chart_data | tojson | safe }}
+};
+
+// Status Chart
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: chartData.status.labels,
+        datasets: [{
+            data: chartData.status.data,
+            backgroundColor: ['#ffc107', '#17a2b8', '#28a745'],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Priority chart removed - all tickets equal
+
+// Block Chart
+const blockCtx = document.getElementById('blockChart').getContext('2d');
+new Chart(blockCtx, {
+    type: 'bar',
+    data: {
+        labels: chartData.block.labels,
+        datasets: [{
+            label: 'Tickets',
+            data: chartData.block.data,
+            backgroundColor: '#007bff',
+            borderColor: '#0056b3',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Problem Type Chart
+const problemCtx = document.getElementById('problemChart').getContext('2d');
+new Chart(problemCtx, {
+    type: 'bar',
+    data: {
+        labels: chartData.problem.labels,
+        datasets: [{
+            label: 'Tickets',
+            data: chartData.problem.data,
+            backgroundColor: [
+                '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', 
+                '#9966ff', '#ff9f40', '#ff6384', '#c9cbcf'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
