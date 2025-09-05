@@ -181,6 +181,24 @@ class DatabaseManager:
             print(f"Error updating ticket: {str(e)}")
             return False
     
+    def delete_ticket(self, ticket_id):
+        """Delete a ticket by ticket_id"""
+        session = self.SessionLocal()
+        try:
+            ticket = session.query(Ticket).filter_by(ticket_id=ticket_id).first()
+            if ticket:
+                session.delete(ticket)
+                session.commit()
+                session.close()
+                return True
+            session.close()
+            return False
+        except Exception as e:
+            session.rollback()
+            session.close()
+            print(f"Error deleting ticket: {str(e)}")
+            return False
+    
     def get_next_ticket_id(self):
         """Generate next ticket ID"""
         session = self.SessionLocal()

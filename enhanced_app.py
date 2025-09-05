@@ -454,6 +454,38 @@ def update_ticket():
         flash(success_message, 'success')
         return redirect(url_for('view_tickets'))
 
+@app.route('/delete_ticket/<ticket_id>', methods=['POST'])
+@superadmin_required
+def delete_ticket(ticket_id):
+    """Delete a ticket - SuperAdmin only"""
+    try:
+        if USE_DATABASE:
+            # Delete from database
+            if db_manager.delete_ticket(ticket_id):
+                flash(f'Ticket {ticket_id} has been permanently deleted.', 'success')
+            else:
+                flash(f'Ticket {ticket_id} not found or could not be deleted.', 'error')
+        else:
+            # Delete from CSV
+            df = pd.read_csv(CSV_FILE, dtype=str)
+            df = df.fillna('')
+            
+            # Find the ticket
+            mask = df['Ticket ID'] == ticket_id
+            if mask.any():
+                # Remove the ticket row
+                df = df[~mask]
+                # Save back to CSV
+                df.to_csv(CSV_FILE, index=False)
+                flash(f'Ticket {ticket_id} has been permanently deleted.', 'success')
+            else:
+                flash(f'Ticket {ticket_id} not found.', 'error')
+                
+    except Exception as e:
+        flash(f'Error deleting ticket: {str(e)}', 'error')
+    
+    return redirect(url_for('view_tickets'))
+
 @app.route('/api/tickets')
 def api_tickets():
     """API endpoint for tickets data"""
