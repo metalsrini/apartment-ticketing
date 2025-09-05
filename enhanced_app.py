@@ -216,9 +216,39 @@ def validate_form_data(data):
     
     return errors
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page for admin access"""
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if username in USER_CREDENTIALS and USER_CREDENTIALS[username]['password'] == password:
+            session['logged_in'] = True
+            session['username'] = username
+            session['role'] = USER_CREDENTIALS[username]['role']
+            flash('Login successful!', 'success')
+            
+            # Redirect to next page or tickets view
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('view_tickets'))
+        else:
+            flash('Invalid username or password.', 'error')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    """Logout and clear session"""
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('index'))
+
 @app.route('/')
 def index():
     """Main page with ticket submission form"""
+    initialize_csv()
+    initialize_database()
     return render_template('enhanced_index.html', 
                          block_options=BLOCK_OPTIONS, 
                          problem_types=PROBLEM_TYPES,
